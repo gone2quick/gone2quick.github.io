@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Save Editor</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f5f5f5; }
+    .perk-block { border: 1px solid #ccc; background: #fff; padding: 10px; margin-bottom: 10px; }
+    select, input { margin-right: 10px; }
+    button.add-perk { margin-top: 10px; }
+    .skill-table { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+    .skill-entry { width: 150px; }
+  </style>
+</head>
+<body>
+  <h1>Save Editor</h1>
+  <input type="file" id="fileInput" accept=".txt" />
+  <button id="downloadBtn">Download</button>
+  <div id="editor"></div>
+
+  <script>
+    const perkList = { /* full perk list here */ };
+    const specList = { /* full spec list here */ };
+
+    const skillLabels = [
+      "Melee", "Ranged", "Hunting", "Fishing", "Farming", "Mining", "Building",
+      "Smithing", "Tailoring", "Artistry", "Medicine", "Cooking", "Trading",
+      "Researching", "Socializing", "Loyalty"
+    ];
+
+    let parsedData = [];
+
+    document.getElementById('fileInput').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function () {
+        const text = reader.result;
+        parsedData = JSON.parse(text);
+        renderEditor();
+      };
+      reader.readAsText(file);
+    });
+
+    function renderEditor() {
+      const container = document.getElementById('editor');
+      container.innerHTML = '';
+      parsedData.forEach((char, idx) => {
+        const div = document.createElement('div');
+        div.className = 'perk-block';
+        div.innerHTML = `<h3>${char.nameFirst || 'Character ' + (idx + 1)}</h3>`;
+
+        char.perkArray.forEach((perk, pidx) => {
+          div.appendChild(renderPerkRow(perk, idx, pidx));
+        });
+
+        const addButton = document.createElement('button');
+        addButton.textContent = '+ Add Perk';
+        addButton.className = 'add-perk';
+        addButton.onclick = () => {
+          const newPerk = { thePerk: 0.0, rank: 1.0, spec: -4.0 };
+          char.perkArray.push(newPerk);
+          renderEditor();
+        };
+        div.appendChild(addButton);
+
+        const skillDiv = document.createElement('div');
+        skillDiv.className = 'skill-table';
+        char.skill.forEach((value, sidx) => {
+          const skillBox = document.createElement('div');
+          skillBox.className = 'skill-entry';
+          skillBox.innerHTML = `
+            <label>${skillLabels[sidx]}:
+              <input type="number" step="0.01" data-char="${idx}" data-skill="${sidx}" value="${value}" class="skill-input" />
+            </label>
+          `;
+          skillDiv.appendChild(skillBox);
+        });
+        div.appendChild(skillDiv);
+
+        container.appendChild(div);
+      });
+    }
+
+    function renderPerkRow(perk, idx, pidx) {
+      const perkRow = document.createElement('div');
+      perkRow.innerHTML = `
+        <label>Perk:
+          <select data-char="${idx}" data-perk="${pidx}" class="perk-select">
+            ${Object.entries(perkList).map(([id, [name, tip]]) => `<option value="${id}" title="${tip}" ${parseInt(id) === perk.thePerk ? 'selected' : ''}>${name}</option>`).join('')}
+          </select>
+        </label>
+        <label>Rank:
+          <input type="number" value="${perk.rank}" data-char="${idx}" data-perk="${pidx}" class="rank-input" />
+        </label>
+        <label class="spec-wrapper">
+          <span>Spec:</span>
+          <select data-char="${idx}" data-perk="${pidx}" class="spec-select" ${perk.thePerk !== 25 ? 'style="display:none;"' : ''}>
+            ${Object.entries(specList).map(([id, name]) => `<option value="${id}" ${parseInt(id) === perk.spec ? 'selected' : ''}>${name}</option>`).join('')}
+          </select>
+        </label>
+      `;
+      return perkRow;
+    }
+
+    document.addEventListener('input', e => {
+      const charIdx = +e.target.dataset.char;
+      if (e.target.classList.contains('skill-input')) {
+        const skillIdx = +e.target.dataset.skill;
+        parsedData[charIdx].skill[skillIdx] = parseFloat(e.target.value);
+        return;
+      }
+
+      const perkIdx = +e.target.dataset.perk;
+      const perk = parsedData[charIdx].perkArray[perkIdx];
+
+      if (e.target.classList.contains('perk-select')) {
+        perk.thePerk = parseFloat(e.target.value);
+        if (perk.thePerk !== 25) {
+          perk.spec = -4.0;
+          const specSelect = e.target.parentElement.parentElement.querySelector('.spec-select');
+          if (specSelect) specSelect.style.display = 'none';
+        } else {
+          if (perk.spec === -4.0) perk.spec = 0.0;
+          const specSelect = e.target.parentElement.parentElement.querySelector('.spec-select');
+          if (specSelect) specSelect.style.display = 'inline';
+        }
+      }
+
+      if (e.target.classList.contains('rank-input')) {
+        perk.rank = parseFloat(e.target.value);
+      }
+
+      if (e.target.classList.contains('spec-select')) {
+        perk.spec = parseFloat(e.target.value);
+      }
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      const formatFloats = val => (typeof val === 'number' ? Number(val.toFixed(1)) : val);
+
+      const text = parsedData.map(obj => {
+        return JSON.stringify(obj, (k, v) => {
+          if (Array.isArray(v)) {
+            return v.map(formatFloats);
+          } else if (typeof v === 'object' && v !== null) {
+            const newObj = {};
+            for (const key in v) {
+              newObj[key] = formatFloats(v[key]);
+            }
+            return newObj;
+          }
+          return formatFloats(v);
+        });
+      }).join('\n');
+
+      const blob = new Blob([text], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'edited_output.txt';
+      link.click();
+    });
+  </script>
+</body>
+</html>
