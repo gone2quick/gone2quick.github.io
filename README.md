@@ -1,0 +1,1 @@
+# gone2quick.github.io
