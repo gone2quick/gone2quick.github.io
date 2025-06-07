@@ -20,57 +20,56 @@
 
   <script>
     const perkList = {
-      0: ["Stout", "15% more Physical and Energy"],
-      1: ["Strong Physique", "25% more health"],
-      2: ["Lean", "-20% hunger gain"],
-      3: ["Nimble", "+20% move speed"],
-      4: ["Tough Skin", "5% natural damage resistance per rank"],
-      5: ["Energetic", "+20% Energy Recovery"],
-      6: ["Swamp Legs", "No movement penalty on mud"],
-      7: ["Poison Arrows", "Poisoned arrows"],
-      8: ["Carefree", "20% less Psychic Damage"],
-      9: ["Cold Blooded", "Less Penalties from Cold Weather"],
-      10: ["Warm Blooded", "Less Penalties from Hot Weather"],
-      11: ["Resistant", "20% per rank Poison Damage Resistance"],
-      12: ["Cannibal", "No penalties from eating people, large social penalty"],
-      13: ["Disarm", "5% per rank chance to Disarm melee enemy"],
-      14: ["Teacher", "May teach a perk during social interactions"],
-      15: ["Silver Bolts", "50% damage to undead with crossbow"],
-      16: ["Silver Bullet", "50% damage to undead with musket"],
-      17: ["Parry", "8% per rank block with melee weapon"],
-      18: ["Dodge", "8% per rank dodge"],
-      19: ["Backstab", "3x damage from behind, 10x out of combat"],
-      20: ["Major Conviction", "50% Psychic Damage Resistance"],
-      21: ["Minor Conviction", "30% Psychic Damage Resistance"],
-      22: ["Scholarly Minded", "20% per rank research speed"],
-      23: ["Dark Magic Risen", "Turn a corpse into a Risen"],
-      24: ["Dark Magic Siphon", "+1 Dark Power per rank for existing"],
-      25: ["Specialty", "Enables selection of a spec"],
-      26: ["Aimed Arc", "Fire further with bows at cost of accuracy"],
-      27: ["Dark Magic: Bolt", "Basic dark magic ranged attack"],
-      28: ["Light Magic: Smite", "Once per day heavy attack"],
-      29: ["Grim", "+20% Psychic Resistance & +5% Negative Interactions per rank"],
-      30: ["Tender", "10% positive interaction, -5% psychic resistance per rank"],
-      31: ["Poison Brewer", "Create poison flasks at herb table"],
-      32: ["Recall", "Allows Risen to do all tasks"],
-      33: ["Beacon", "+1 Light Magic per rank"],
-      34: ["Putrid Minion", "Turn putrid pile into undead ranged minion"],
-      35: ["Light Guardian", "Summons guardian of light for 3 Light Power"],
-      36: ["Searing Beam", "Ray of light attack that deals burning damage"],
-      37: ["Terror", "Dark magic attack that deals psychic damage"],
-      38: ["Inspired", "Create art based on historical figures"],
-      39: ["Rejuvenated", "Reverses aging by 20 years per rank"],
-      40: ["Senesced", "Gain 20 years per rank"],
-      41: ["Inner Shade", "Become a shade upon death or rank 5"]
-    };
-
+  0: ["Stout", "15% more Physical and Energy"],
+  1: ["Strong Physique", "25% more health"],
+  2: ["Lean", "-20% hunger gain"],
+  3: ["Nimble", "+20% move speed"],
+  4: ["Tough Skin", "5% natural damage resistance per rank"],
+  5: ["Energetic", "+20% Energy Recovery"],
+  6: ["Swamp Legs", "No movement penalty on mud"],
+  7: ["Poison Arrows", "Poisoned arrows"],
+  8: ["Carefree", "20% less Psychic Damage"],
+  9: ["Cold Blooded", "Less Penalties from Cold Weather"],
+  10: ["Warm Blooded", "Less Penalties from Hot Weather"],
+  11: ["Resistant", "20% per rank Poison Damage Resistance"],
+  12: ["Cannibal", "No penalties from eating people, large social penalty"],
+  13: ["Disarm", "5% per rank chance to Disarm melee enemy"],
+  14: ["Teacher", "May teach a perk during social interactions"],
+  15: ["Silver Bolts", "50% damage to undead with crossbow"],
+  16: ["Silver Bullet", "50% damage to undead with musket"],
+  17: ["Parry", "8% per rank block with melee weapon"],
+  18: ["Dodge", "8% per rank dodge"],
+  19: ["Backstab", "3x damage from behind, 10x out of combat"],
+  20: ["Major Conviction", "50% Psychic Damage Resistance"],
+  21: ["Minor Conviction", "30% Psychic Damage Resistance"],
+  22: ["Scholarly Minded", "20% per rank research speed"],
+  23: ["Dark Magic Risen", "Turn a corpse into a Risen"],
+  24: ["Dark Magic Siphon", "+1 Dark Power per rank for existing"],
+  25: ["Specialty", "Enables selection of a spec"],
+  26: ["Aimed Arc", "Fire further with bows at cost of accuracy"],
+  27: ["Dark Magic: Bolt", "Basic dark magic ranged attack"],
+  28: ["Light Magic: Smite", "Once per day heavy attack"],
+  29: ["Grim", "+20% Psychic Resistance & +5% Negative Interactions per rank"],
+  30: ["Tender", "10% positive interaction, -5% psychic resistance per rank"],
+  31: ["Poison Brewer", "Create poison flasks at herb table"],
+  32: ["Recall", "Allows Risen to do all tasks"],
+  33: ["Beacon", "+1 Light Magic per rank"],
+  34: ["Putrid Minion", "Turn putrid pile into undead ranged minion"],
+  35: ["Light Guardian", "Summons guardian of light for 3 Light Power"],
+  36: ["Searing Beam", "Ray of light attack that deals burning damage"],
+  37: ["Terror", "Dark magic attack that deals psychic damage"],
+  38: ["Inspired", "Create art based on historical figures"],
+  39: ["Rejuvenated", "Reverses aging by 20 years per rank"],
+  40: ["Senesced", "Gain 20 years per rank"],
+  41: ["Inner Shade", "Become a shade upon death or rank 5"]
+};
     const specList = {
-      0: "Short Bow", 1: "Long Bow", 2: "Crossbow", 3: "Musket", 4: "Short Sword", 5: "Long Sword", 6: "Great Sword",
-      7: "Battle Axe", 8: "Hand Axe", 9: "Warhammer", 10: "Club", 11: "Mace", 12: "Dagger", 13: "Wood Shield",
-      14: "Metal Shield", 15: "Spear", 16: "Tower Shield", 17: "Tower Shield Metal", 18: "Blunderbuss",
-      19: "Flintlock", 20: "Grenade", 21: "Fire Bomb", 22: "Dark Bolt Spell", 23: "Smite Spell",
-      24: "Poison Flask", 25: "Searing Beam", 26: "Terror Spell", 27: "Crossbow Repeater", 28: "Sling"
-    };
+  0: "Short Bow", 1: "Long Bow", 2: "Crossbow", 3: "Musket", 4: "Short Sword", 5: "Long Sword", 6: "Great Sword",
+  7: "Battle Axe", 8: "Hand Axe", 9: "Warhammer", 10: "Club", 11: "Mace", 12: "Dagger", 13: "Wood Shield",
+  14: "Metal Shield", 15: "Spear", 16: "Tower Shield", 17: "Tower Shield Metal", 18: "Blunderbuss",
+  19: "Flintlock", 20: "Grenade", 21: "Fire Bomb", 22: "Dark Bolt Spell", 23: "Smite Spell",
+  24: "Poison Flask", 25: "Searing Beam", 26: "Terror Spell", 27: "Crossbow Repeater", 28: "Sling"
+};
 
     const skillLabels = [
       "Melee", "Ranged", "Hunting", "Fishing", "Farming", "Mining", "Building",
@@ -184,15 +183,21 @@
 
     document.getElementById('downloadBtn').addEventListener('click', () => {
       const formatFloats = val => (typeof val === 'number' ? Number(val.toFixed(1)) : val);
-      const text = parsedData.map(obj => JSON.stringify(obj, (k, v) => {
-        if (Array.isArray(v)) return v.map(formatFloats);
-        if (typeof v === 'object' && v !== null) {
-          const newObj = {};
-          for (const key in v) newObj[key] = formatFloats(v[key]);
-          return newObj;
-        }
-        return formatFloats(v);
-      })).join('\n');
+
+      const text = parsedData.map(obj => {
+        // Sort perkArray by thePerk
+        const sortedPerks = [...obj.perkArray].sort((a, b) => a.thePerk - b.thePerk);
+        const fixedPerks = sortedPerks.map(p => ({
+          rank: formatFloats(p.rank),
+          thePerk: formatFloats(p.thePerk),
+          spec: formatFloats(p.spec)
+        }));
+
+        const newObj = { ...obj, perkArray: fixedPerks };
+
+        return JSON.stringify(newObj);
+      }).join('\n');
+
       const blob = new Blob([text], { type: 'text/plain' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
