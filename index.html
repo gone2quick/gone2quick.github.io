@@ -1,221 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Save Editor</title>
-  <style>
-    body { font-family: sans-serif; padding: 20px; background: #f5f5f5; }
-    .perk-block { border: 1px solid #ccc; background: #fff; padding: 10px; margin-bottom: 10px; }
-    select, input { margin-right: 10px; }
-    button.add-perk { margin-top: 10px; }
-    .skill-table { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
-    .skill-entry { width: 150px; }
-  </style>
+<meta charset="UTF-8">
+<title>Biome Grid Renderer</title>
+<style>
+  body { font-family: sans-serif; margin: 20px; }
+  canvas { border: 1px solid #000; display: block; margin-top: 10px; }
+</style>
 </head>
 <body>
-  <h1>Save Editor</h1>
-  <input type="file" id="fileInput" accept=".txt">
-  <button id="downloadBtn">Download</button>
-  <div id="editor"></div>
-<div id="tutorial">
-  <strong>Welcome to the Save Editor!</strong><br>
-  Load a <code>.txt</code> file to:
-  <ul>
-    <li>Edit perks and their ranks</li>
-    <li>Assign specialty specs (with the Specialty perk)</li>
-    <li>Edit all skills from Melee to Loyalty</li>
-    <li>Add new perks and download the result</li>
-  </ul>
-Note you have to just copy your Human.save into a .txt after downloading you have to seperate
-the characters and paste into the old Human.save file KEEP THE "[]" AND THE HIDDEN CHARACTER
-</div>
 
-  <script>
-    const perkList = {
-  0: ["Stout", "15% more Physical and Energy"],
-  1: ["Strong Physique", "25% more health"],
-  2: ["Lean", "-20% hunger gain"],
-  3: ["Nimble", "+20% move speed"],
-  4: ["Tough Skin", "5% natural damage resistance per rank"],
-  5: ["Energetic", "+20% Energy Recovery"],
-  6: ["Swamp Legs", "No movement penalty on mud"],
-  7: ["Poison Arrows", "Poisoned arrows"],
-  8: ["Carefree", "20% less Psychic Damage"],
-  9: ["Cold Blooded", "Less Penalties from Cold Weather"],
-  10: ["Warm Blooded", "Less Penalties from Hot Weather"],
-  11: ["Resistant", "20% per rank Poison Damage Resistance"],
-  12: ["Cannibal", "No penalties from eating people, large social penalty"],
-  13: ["Disarm", "5% per rank chance to Disarm melee enemy"],
-  14: ["Teacher", "May teach a perk during social interactions"],
-  15: ["Silver Bolts", "50% damage to undead with crossbow"],
-  16: ["Silver Bullet", "50% damage to undead with musket"],
-  17: ["Parry", "8% per rank block with melee weapon"],
-  18: ["Dodge", "8% per rank dodge"],
-  19: ["Backstab", "3x damage from behind, 10x out of combat"],
-  20: ["Major Conviction", "50% Psychic Damage Resistance"],
-  21: ["Minor Conviction", "30% Psychic Damage Resistance"],
-  22: ["Scholarly Minded", "20% per rank research speed"],
-  23: ["Dark Magic Risen", "Turn a corpse into a Risen"],
-  24: ["Dark Magic Siphon", "+1 Dark Power per rank for existing"],
-  25: ["Specialty", "Enables selection of a spec"],
-  26: ["Aimed Arc", "Fire further with bows at cost of accuracy"],
-  27: ["Dark Magic: Bolt", "Basic dark magic ranged attack"],
-  28: ["Light Magic: Smite", "Once per day heavy attack"],
-  29: ["Grim", "+20% Psychic Resistance & +5% Negative Interactions per rank"],
-  30: ["Tender", "10% positive interaction, -5% psychic resistance per rank"],
-  31: ["Poison Brewer", "Create poison flasks at herb table"],
-  32: ["Recall", "Allows Risen to do all tasks"],
-  33: ["Beacon", "+1 Light Magic per rank"],
-  34: ["Putrid Minion", "Turn putrid pile into undead ranged minion"],
-  35: ["Light Guardian", "Summons guardian of light for 3 Light Power"],
-  36: ["Searing Beam", "Ray of light attack that deals burning damage"],
-  37: ["Terror", "Dark magic attack that deals psychic damage"],
-  38: ["Inspired", "Create art based on historical figures"],
-  39: ["Rejuvenated", "Reverses aging by 20 years per rank"],
-  40: ["Senesced", "Gain 20 years per rank"],
-  41: ["Inner Shade", "Become a shade upon death or rank 5"]
-};
-    const specList = {
-  0: "Short Bow", 1: "Long Bow", 2: "Crossbow", 3: "Musket", 4: "Short Sword", 5: "Long Sword", 6: "Great Sword",
-  7: "Battle Axe", 8: "Hand Axe", 9: "Warhammer", 10: "Club", 11: "Mace", 12: "Dagger", 13: "Wood Shield",
-  14: "Metal Shield", 15: "Spear", 16: "Tower Shield", 17: "Tower Shield Metal", 18: "Blunderbuss",
-  19: "Flintlock", 20: "Grenade", 21: "Fire Bomb", 22: "Dark Bolt Spell", 23: "Smite Spell",
-  24: "Poison Flask", 25: "Searing Beam", 26: "Terror Spell", 27: "Crossbow Repeater", 28: "Sling"
+<h2>Biome Grid Renderer</h2>
+
+<input type="file" id="fileInput" accept=".save">
+<label for="scale">Scale Factor:</label>
+<input type="number" id="scale" value="4" min="1" style="width:50px;">
+<button id="renderBtn">Render PNG</button>
+<button id="downloadBtn" disabled>Download PNG</button>
+
+<canvas id="mapCanvas"></canvas>
+
+<script>
+const biomeColors = {
+  0: [245, 196, 110],
+  1: [204, 174, 77],
+  2: [66, 135, 40],
+  3: [184, 179, 82],
+  4: [119, 155, 70],
+  5: [70, 128, 70],
+  6: [59, 108, 79],
+  7: [70, 128, 70],
+  8: [131, 160, 131],
+  9: [245, 245, 255],
+  10: [15, 55, 100],
+  11: [39, 75, 116],
+  12: [75, 0, 110]  // modifier
 };
 
-    const skillLabels = [
-      "Melee", "Ranged", "Hunting", "Fishing", "Farming", "Mining", "Building",
-      "Smithing", "Tailoring", "Artistry", "Medicine", "Cooking", "Trading",
-      "Researching", "Socializing", "Loyalty"
-    ];
+const loopWidth = 256;
 
-    let parsedData = [];
+let grid = [];
+let canvas = document.getElementById('mapCanvas');
+let ctx = canvas.getContext('2d');
+let imageRendered = false;
 
-    document.getElementById('fileInput').addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function () {
-        const text = reader.result;
-        parsedData = JSON.parse(text);
-        renderEditor();
-      };
-      reader.readAsText(file);
-    });
+function parseSaveFile(text) {
+  text = text.trim();
+  if (text.startsWith("[") && text.endsWith("]")) text = text.slice(1, -1);
+  text = [...text].filter(c => c >= ' ' && c <= '~').join('');
 
-    function renderEditor() {
-      const container = document.getElementById('editor');
-      container.innerHTML = '';
-      parsedData.forEach((char, idx) => {
-        const div = document.createElement('div');
-        div.className = 'perk-block';
-        div.innerHTML = `<h3>${char.nameFirst || 'Character ' + (idx + 1)}</h3>`;
-
-        char.perkArray.forEach((perk, pidx) => {
-          div.appendChild(renderPerkRow(perk, idx, pidx));
-        });
-
-        const addButton = document.createElement('button');
-        addButton.textContent = '+ Add Perk';
-        addButton.className = 'add-perk';
-        addButton.onclick = () => {
-          const newPerk = { thePerk: 0.0, rank: 1.0, spec: -4.0 };
-          char.perkArray.push(newPerk);
-          renderEditor();
-        };
-        div.appendChild(addButton);
-
-        const skillDiv = document.createElement('div');
-        skillDiv.className = 'skill-table';
-        char.skill.forEach((value, sidx) => {
-          const skillBox = document.createElement('div');
-          skillBox.className = 'skill-entry';
-          skillBox.innerHTML = `
-            <label>${skillLabels[sidx]}:
-              <input type="number" step="0.01" data-char="${idx}" data-skill="${sidx}" value="${value}" class="skill-input" />
-            </label>
-          `;
-          skillDiv.appendChild(skillBox);
-        });
-        div.appendChild(skillDiv);
-
-        container.appendChild(div);
-      });
+  const regex = /\[(\d+\.?\d*),\s*(\d+\.?\d*)\]|(\d+\.?\d*)/g;
+  let match, tiles = [];
+  while ((match = regex.exec(text)) !== null) {
+    if (match[1] !== undefined) {
+      tiles.push([parseInt(parseFloat(match[1])), parseInt(parseFloat(match[2]))]);
+    } else {
+      tiles.push([parseInt(parseFloat(match[3])), null]);
     }
+  }
+  return tiles;
+}
 
-    function renderPerkRow(perk, idx, pidx) {
-      const perkRow = document.createElement('div');
-      perkRow.innerHTML = `
-        <label>Perk:
-          <select data-char="${idx}" data-perk="${pidx}" class="perk-select">
-            ${Object.entries(perkList).map(([id, [name, tip]]) => `<option value="${id}" title="${tip}" ${parseInt(id) === perk.thePerk ? 'selected' : ''}>${name}</option>`).join('')}
-          </select>
-        </label>
-        <label>Rank:
-          <input type="number" value="${perk.rank}" data-char="${idx}" data-perk="${pidx}" class="rank-input" />
-        </label>
-        <label class="spec-wrapper">
-          <span>Spec:</span>
-          <select data-char="${idx}" data-perk="${pidx}" class="spec-select" ${perk.thePerk !== 25 ? 'style="display:none;"' : ''}>
-            ${Object.entries(specList).map(([id, name]) => `<option value="${id}" ${parseInt(id) === perk.spec ? 'selected' : ''}>${name}</option>`).join('')}
-          </select>
-        </label>
-      `;
-      return perkRow;
+function buildGrid(tiles) {
+  const height = Math.ceil(tiles.length / loopWidth);
+  const width = loopWidth;
+  let g = Array.from({length: height}, () => Array.from({length: width}, () => [0, null]));
+  for (let i = 0; i < tiles.length; i++) {
+    const x = Math.floor(i / height);
+    const y = i % height;
+    if (x < width && y < height) g[y][x] = tiles[i];
+  }
+  return g;
+}
+
+function renderGrid(grid, scale) {
+  const height = grid.length;
+  const width = grid[0].length;
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let [biome, mod] = grid[y][x];
+      let color = biomeColors[biome] || [100,100,100];
+      if (mod === 12) { // Dreadlands overlay
+        color = [
+          Math.floor(color[0]*0.5 + 90*0.5),
+          Math.floor(color[1]*0.5 + 0),
+          Math.floor(color[2]*0.5 + 120*0.5)
+        ];
+      }
+      ctx.fillStyle = `rgb(${color[0]},${color[1]},${color[2]})`;
+      ctx.fillRect(x*scale, y*scale, scale, scale);
     }
+  }
+}
 
-    document.addEventListener('input', e => {
-      const charIdx = +e.target.dataset.char;
-      if (e.target.classList.contains('skill-input')) {
-        const skillIdx = +e.target.dataset.skill;
-        parsedData[charIdx].skill[skillIdx] = parseFloat(e.target.value);
-        return;
-      }
-      const perkIdx = +e.target.dataset.perk;
-      const perk = parsedData[charIdx].perkArray[perkIdx];
-      if (e.target.classList.contains('perk-select')) {
-        perk.thePerk = parseFloat(e.target.value);
-        if (perk.thePerk !== 25) {
-          perk.spec = -4.0;
-          const specSelect = e.target.parentElement.parentElement.querySelector('.spec-select');
-          if (specSelect) specSelect.style.display = 'none';
-        } else {
-          if (perk.spec === -4.0) perk.spec = 0.0;
-          const specSelect = e.target.parentElement.parentElement.querySelector('.spec-select');
-          if (specSelect) specSelect.style.display = 'inline';
-        }
-      }
-      if (e.target.classList.contains('rank-input')) {
-        perk.rank = parseFloat(e.target.value);
-      }
-      if (e.target.classList.contains('spec-select')) {
-        perk.spec = parseFloat(e.target.value);
-      }
-    });
+document.getElementById('renderBtn').addEventListener('click', () => {
+  const fileInput = document.getElementById('fileInput');
+  if (!fileInput.files.length) return alert("Select a .save file first.");
+  const scale = parseInt(document.getElementById('scale').value) || 4;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    const tiles = parseSaveFile(text);
+    grid = buildGrid(tiles);
+    renderGrid(grid, scale);
+    imageRendered = true;
+    document.getElementById('downloadBtn').disabled = false;
+  }
+  reader.readAsText(fileInput.files[0]);
+});
 
-    document.getElementById('downloadBtn').addEventListener('click', () => {
-      const formatFloats = val => (typeof val === 'number' ? Number(val.toFixed(1)) : val);
+document.getElementById('downloadBtn').addEventListener('click', () => {
+  if (!imageRendered) return;
+  const link = document.createElement('a');
+  link.href = canvas.toDataURL('image/png');
+  link.download = 'biomeGrid.png';
+  link.click();
+});
+</script>
 
-      const text = parsedData.map(obj => {
-        // Sort perkArray by thePerk
-        const sortedPerks = [...obj.perkArray].sort((a, b) => a.thePerk - b.thePerk);
-        const fixedPerks = sortedPerks.map(p => ({
-          rank: formatFloats(p.rank),
-          thePerk: formatFloats(p.thePerk),
-          spec: formatFloats(p.spec)
-        }));
-
-        const newObj = { ...obj, perkArray: fixedPerks };
-
-        return JSON.stringify(newObj);
-      }).join('\n');
-
-      const blob = new Blob([text], { type: 'text/plain' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'edited_output.txt';
-      link.click();
-    });
-  </script>
 </body>
 </html>
